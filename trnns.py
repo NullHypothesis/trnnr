@@ -50,19 +50,26 @@ log.basicConfig(level=log.getLevelName("INFO"),
                 format="%(asctime)s [%(levelname)s]: %(message)s")
 
 
+def dirport_to_int(dir_port):
+    """
+    If the dirport is `None', return 0.
+    """
+
+    if dir_port is None:
+        return 0
+    else:
+        return dir_port
+
+
 def to_str(desc):
     """
     Turn relay descriptor into string.
     """
 
-    dir_port = desc.dir_port
-    if dir_port is None:
-        dir_port = 0
-
     return "%s%s%d%d%s%s%d%d%d%s%s%d%s" % (desc.nickname,
                                            desc.address,
                                            desc.or_port,
-                                           dir_port,
+                                           dirport_to_int(desc.dir_port),
                                            desc.tor_version,
                                            desc.exit_policy,
                                            desc.average_bandwidth,
@@ -103,11 +110,12 @@ def print_desc(desc):
     Print a descriptor.
     """
 
-    print("%s,%s,%s,%d,%s,%s,%d,%s" %
+    print("%s,%s,%s,%d,%d,%s,%s,%d,%s" %
           (desc.fingerprint,
            desc.nickname,
            desc.address,
            desc.or_port,
+           dirport_to_int(desc.dir_port),
            desc.tor_version,
            desc.operating_system,
            desc.observed_bandwidth,
@@ -164,7 +172,8 @@ def process_descriptors(relay_fpr, num_results):
 
     # Display the top n results.
 
-    print("distance,fingerprint,nickname,addr,orport,version,os,bw,contact")
+    print("distance,fingerprint,nickname,addr,orport,dir_port,"
+          "version,os,bw,contact")
     for i, elem in enumerate(sorted_dists):
         if i == num_results:
             break
