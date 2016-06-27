@@ -110,15 +110,18 @@ def print_desc(desc):
     Print a descriptor.
     """
 
-    print("%s,%s,%s,%d,%d,%s,%s,%d,%s" %
-          (desc.fingerprint,
+    print("%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s" %
+          (desc.fingerprint[:8],
            desc.nickname,
            desc.address,
            desc.or_port,
            dirport_to_int(desc.dir_port),
            desc.tor_version,
            desc.operating_system,
+           desc.average_bandwidth,
+           desc.burst_bandwidth,
            desc.observed_bandwidth,
+           desc.uptime,
            desc.contact))
 
 
@@ -173,7 +176,7 @@ def process_descriptors(relay_fpr, num_results):
     # Display the top n results.
 
     print("distance,fingerprint,nickname,addr,orport,dirport,"
-          "version,os,bw,contact")
+          "version,os,avgbw,burstbw,obsbw,uptime,contact")
     for i, elem in enumerate(sorted_dists):
         if i == num_results:
             break
