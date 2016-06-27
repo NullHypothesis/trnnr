@@ -172,7 +172,7 @@ def process_descriptors(relay_fpr, num_results):
 
     # Display the top n results.
 
-    print("distance,fingerprint,nickname,addr,orport,dir_port,"
+    print("distance,fingerprint,nickname,addr,orport,dirport,"
           "version,os,bw,contact")
     for i, elem in enumerate(sorted_dists):
         if i == num_results:
