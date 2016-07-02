@@ -38,13 +38,13 @@ import argparse
 import operator
 import logging as log
 
-# pip3 install python-Levenshtein
+# pip3 install python-Levenshtein stem tabulate termcolor
 
 import Levenshtein
-
-# pip3 install stem
-
+import tabulate
+import termcolor
 from stem.descriptor.remote import DescriptorDownloader
+
 
 log.basicConfig(level=log.getLevelName("INFO"),
                 format="%(asctime)s [%(levelname)s]: %(message)s")
@@ -102,27 +102,59 @@ def parse_args():
                         help="The number of most similar relays to display "
                              "(default=20).")
 
+    parser.add_argument("-c",
+                        "--colour",
+                        action="store_true",
+                        default=False,
+                        help="Use terminal colours to visually highlight the "
+                             "difference between relays (default=false).")
+
     return parser.parse_args()
 
 
-def print_desc(desc):
+def desc_to_str(desc):
     """
-    Print a descriptor.
+    Return a string representation of the given descriptor.
     """
 
-    print("%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s" %
-          (desc.fingerprint[:8],
-           desc.nickname,
-           desc.address,
-           desc.or_port,
-           dirport_to_int(desc.dir_port),
-           desc.tor_version,
-           desc.operating_system,
-           desc.average_bandwidth,
-           desc.burst_bandwidth,
-           desc.observed_bandwidth,
-           desc.uptime,
-           desc.contact))
+    return "%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s" % \
+           (desc.fingerprint[:8],
+            desc.nickname,
+            desc.address,
+            desc.or_port,
+            dirport_to_int(desc.dir_port),
+            desc.tor_version,
+            desc.operating_system,
+            desc.average_bandwidth,
+            desc.burst_bandwidth,
+            desc.observed_bandwidth,
+            desc.uptime,
+            desc.contact)
+
+
+def format_desc(desc, ref_desc, use_colour):
+    """
+    Return potentially colourised string list of descriptor features.
+    """
+
+    desc, ref_desc = desc_to_str(desc), desc_to_str(ref_desc)
+    final_string = ""
+
+    for string, ref_string in zip(desc.split(","), ref_desc.split(",")):
+        for char, ref_char in zip(string, ref_string):
+
+            # If a character in the string is identical to the reference
+            # string, we highlight it in red.  That makes it easier to visually
+            # spot similarities in the descriptors.
+
+            if (char == ref_char) and use_colour:
+                final_string += termcolor.colored(char, "red")
+            else:
+                final_string += char
+
+        final_string += ","
+
+    return final_string.split(",")
 
 
 def fetch_descriptors():
@@ -146,7 +178,7 @@ def fetch_descriptors():
     return descs
 
 
-def process_descriptors(relay_fpr, num_results):
+def process_descriptors(relay_fpr, num_results, use_colour):
     """
     Run linear nearest-neighbour search over all descriptors we can get.
     """
@@ -175,14 +207,19 @@ def process_descriptors(relay_fpr, num_results):
 
     # Display the top n results.
 
-    print("distance,fingerprint,nickname,addr,orport,dirport,"
-          "version,os,avgbw,burstbw,obsbw,uptime,contact")
+    lines = [["distance", "fingerprint", "nickname", "addr", "orport",
+              "dirport", "version", "os", "avgbw", "burstbw", "obsbw",
+              "uptime", "contact"]]
     for i, elem in enumerate(sorted_dists):
         if i == num_results:
             break
         fingerprint, distance = elem
-        print("%3d," % distance, end="")
-        print_desc(descs[fingerprint])
+        line = format_desc(descs[fingerprint], descs[relay_fpr], use_colour)
+        lines.append(["%3d" % distance] + line)
+
+    # Finally, nicely print all results in tabular form.
+
+    print(tabulate.tabulate(lines))
 
     return 0
 
@@ -191,6 +228,6 @@ if __name__ == "__main__":
 
     args = parse_args()
     try:
-        sys.exit(process_descriptors(args.relay, args.top))
+        sys.exit(process_descriptors(args.relay, args.top, args.colour))
     except KeyboardInterrupt:
         pass
