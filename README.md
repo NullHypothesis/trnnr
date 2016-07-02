@@ -1,9 +1,12 @@
 # trnnr
 
-This tool implements Tor relay nearest neighbour ranking.  Given a reference Tor
-relay, the idea is to rank other Tor relays based on whose configuration is very
-similar to the reference relay.  That includes relays that share a nickname,
-port, operating system, or bandwidth values.
+Trnnr implements *T*or *r*elay *n*earest *n*eighbour *r*anking.  Given a
+reference Tor relay, the idea is to rank other Tor relays based on whose
+configuration is very similar to the reference relay.  That includes relays that
+share a nickname, port, operating system, or bandwidth values.  To install all
+dependencies, run:
+
+    pip install -r requirements.txt
 
 To use this tool, you only need the fingerprint of a Tor relay whose nearest
 neighbours you want to see, e.g., `9B94CD0B7B8057EAF21BA7F023B7A1C8CA9CE645`.
