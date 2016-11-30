@@ -36,6 +36,7 @@ import sys
 import time
 import argparse
 import operator
+import itertools
 import logging as log
 
 # pip3 install python-Levenshtein stem tabulate termcolor
@@ -141,7 +142,7 @@ def format_desc(desc, ref_desc, use_colour):
     final_string = ""
 
     for string, ref_string in zip(desc.split(","), ref_desc.split(",")):
-        for char, ref_char in zip(string, ref_string):
+        for char, ref_char in itertools.zip_longest(string, ref_string):
 
             # If a character in the string is identical to the reference
             # string, we highlight it in red.  That makes it easier to visually
@@ -150,7 +151,7 @@ def format_desc(desc, ref_desc, use_colour):
             if (char == ref_char) and use_colour:
                 final_string += termcolor.colored(char, "red")
             else:
-                final_string += char
+                final_string += char if char is not None else " "
 
         final_string += ","
 
