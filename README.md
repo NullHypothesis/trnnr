@@ -28,4 +28,4 @@ Finally, to further visually highlight similarities in the output, run:
 
 This will result in output similar to the following image.
 
-![trnnr screenshot](https://nullhypothesis.github.com/trnnr-screenshot.png)
+![trnnr screenshot](https://nullhypothesis.github.io/trnnr-screenshot.png)
